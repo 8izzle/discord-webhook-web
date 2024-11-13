@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Webhook Sender with Text Styling</title>
+    <style>
+        #message {
+            width: 100%;
+            height: 100px;
+        }
+        .style-buttons {
+            margin-bottom: 10px;
+        }
+        .style-buttons button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Send Message to Discord Webhook</h1>
+    <form id="webhookForm">
+        <label for="webhookUrl">Discord Webhook URL:</label><br>
+        <input type="url" id="webhookUrl" name="webhookUrl" required><br><br>
+
+        <div class="style-buttons">
+            <button type="button" onclick="addStyle('**')">Bold</button>
+            <button type="button" onclick="addStyle('*')">Italic</button>
+            <button type="button" onclick="addStyle('__')">Underline</button>
+            <button type="button" onclick="addStyle('~~')">Strikethrough</button>
+            <button type="button" onclick="addStyle('> ')">Block Quote</button>
+            <button type="button" onclick="addStyle('```\n', '\n```')">Code Block</button>
+            <button type="button" onclick="addStyle('`')">Inline Code</button>
+        </div>
+
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message"></textarea><br><br>
+
+        <label for="file">Attach File/Image:</label><br>
+        <input type="file" id="file" name="file"><br><br>
+
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        function addStyle(symbol, closingSymbol = symbol) {
+            const messageBox = document.getElementById('message');
+            const start = messageBox.selectionStart;
+            const end = messageBox.selectionEnd;
+            const selectedText = messageBox.value.substring(start, end);
+            const newText = symbol + selectedText + closingSymbol;
+            messageBox.value = messageBox.value.substring(0, start) + newText + messageBox.value.substring(end);
+            messageBox.focus();
+        }
+
+        document.getElementById('webhookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const webhookUrl = document.getElementById('webhookUrl').value;
+            const message = document.getElementById('message').value;
+            const fileInput = document.getElementById('file').files[0];
+
+            const formData = new FormData();
+            formData.append('content', message);
+            if (fileInput) {
+                formData.append('file', fileInput);
+            }
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Message sent successfully!');
+                } else {
+                    alert('Failed to send message. Check your webhook URL and try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while sending the message.');
+            }
+        });
+    </script>
+</body>
+</html>
